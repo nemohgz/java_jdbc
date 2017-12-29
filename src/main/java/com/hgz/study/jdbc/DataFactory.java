@@ -1,10 +1,18 @@
 package com.hgz.study.jdbc;
 
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
+
 
 /**
  * @Author: HGZ
@@ -14,13 +22,15 @@ import java.sql.Statement;
  * @Modified by:
  */
 public class DataFactory {
-    private static final String JDBCDRIVER = "com.mysql.jdbc.Driver";
-    private static final String DBURL = "jdbc:mysql://localhost/yiibaidb";
-    private static final String USERNAME =  "root";
-    private static final String USERPASSWORD = "hgz666";
+    private static final String PROPERTIES = "mysql.properties";
+    private String jdbcDriver =  "";
+    private String dbURL      =  "";
+    private String userName   =  "";
+    private String passWord   =  "";
     private Connection conn;
     public DataFactory() {
-        init(JDBCDRIVER, DBURL, USERNAME, USERPASSWORD);
+        readConfig();
+        init(jdbcDriver, dbURL, userName, passWord);
     }
     public  DataFactory(String jdbcDriver, String dbURL, String userName, String userPwd) {
         init(jdbcDriver, dbURL, userName, userPwd);
@@ -49,7 +59,7 @@ public class DataFactory {
         Statement stmt = null;
         try {
             stmt = conn.createStatement();
-            String sql = "SELECT employeeNumber,  lastName, firstName FROM Employees" +
+            String sql = "SELECT employeeNumber,  lastName, firstName FROM employees" +
                          " WHERE officeCode=5";
             ResultSet rs = stmt.executeQuery(sql);
 
@@ -83,6 +93,7 @@ public class DataFactory {
             System.out.println("no connect");
             return;
         }
+
     }
     public void close() {
         try {
@@ -91,6 +102,17 @@ public class DataFactory {
             }
         } catch (SQLException se) {
             se.printStackTrace();
+        }
+    }
+    private void readConfig() {
+        try {
+            Configuration config = new PropertiesConfiguration(PROPERTIES);
+            jdbcDriver = config.getString("jdbc.driver");
+            dbURL = config.getString("jbdc.db.url");
+            userName = config.getString("jdbc.db.username");
+            passWord = config.getString("jdbc.db.password");
+        } catch (ConfigurationException ce) {
+            ce.printStackTrace();
         }
     }
 }
